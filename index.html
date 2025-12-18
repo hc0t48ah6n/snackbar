@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M3Snack.js - 軽量スナックバー導入ガイド</title>
+    
+    <!-- SEOメタタグ -->
+    <meta name="description" content="M3Snack.jsは、Material 3デザインのスナックバーをJavaScript一行で表示できる軽量ライブラリです。GASやWebアプリに最適。">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Google+Sans:wght@500&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    
+    <!-- ライブラリの読み込み -->
+    <script src="https://hc0t48ah6n.github.io/snackbar/snackbar.js"></script>
+
+    <style>
+        :root {
+            --primary: #0b57d0;
+            --surface: #f8f9fa;
+            --on-surface: #1f1f1f;
+            --code-bg: #1e1e1e;
+        }
+
+        body {
+            font-family: 'Roboto', 'Google Sans', sans-serif;
+            margin: 0;
+            background-color: var(--surface);
+            color: var(--on-surface);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        h1 {
+            font-family: 'Google Sans';
+            font-size: 3rem;
+            color: var(--primary);
+            margin: 0 0 16px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #d3e3fd;
+            color: #041e49;
+            padding: 4px 16px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .card {
+            background: white;
+            padding: 32px;
+            border-radius: 28px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 32px;
+            border: 1px solid #dadce0;
+        }
+
+        h2 {
+            font-family: 'Google Sans';
+            font-size: 1.8rem;
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 12px 24px;
+            border-radius: 100px;
+            border: 1px solid #747775;
+            background: white;
+            cursor: pointer;
+            font-weight: 500;
+            font-family: 'Google Sans';
+            transition: 0.2s ease;
+        }
+
+        button:hover {
+            background: #f1f3f4;
+            border-color: var(--primary);
+        }
+
+        button.primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        button.primary:hover {
+            background: #0842a0;
+            box-shadow: 0 4px 12px rgba(11, 87, 208, 0.2);
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #dcdcdc;
+            padding: 24px;
+            border-radius: 16px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .highlight { color: #569cd6; }
+        .string { color: #ce9178; }
+        .comment { color: #6a9955; }
+        .prop { color: #9cdcfe; }
+
+        code {
+            background: #eee;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        footer {
+            text-align: center;
+            color: #747775;
+            padding: 40px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <span class="badge">Version 1.1.0</span>
+        <h1>M3Snack.js</h1>
+        <p>Material 3 デザインのスナックバーをJavaScript一行で。CSS不要、Promise対応。</p>
+    </header>
+
+    <section id="demo">
+        <div class="card">
+            <h2>ライブデモ</h2>
+            <p>ボタンをクリックしてスナックバーの動作を確認してください。</p>
+            <div class="btn-group">
+                <button onclick="demoSimple()">シンプルな通知</button>
+                <button class="primary" onclick="demoAction()">アクション付き</button>
+                <button onclick="demoDuration()">2秒で消える通知</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="install">
+        <div class="card">
+            <h2>インストール</h2>
+            <p>HTMLの <code>&lt;head&gt;</code> 内に以下のタグを貼り付けるだけで準備完了です。</p>
+            <pre>&lt;script src=<span class="string">"https://hc0t48ah6n.github.io/snackbar/snackbar.js"</span>&gt;&lt;/script&gt;</pre>
+        </div>
+    </section>
+
+    <section id="usage">
+        <div class="card">
+            <h2>基本的な使い方</h2>
+            <p><code>M3Snack.show()</code> 関数にオプションオブジェクトを渡します。</p>
+            <pre><span class="comment">// 1. シンプルな通知</span>
+M3Snack.show({
+  <span class="prop">message</span>: <span class="string">"保存完了"</span>
+});
+
+<span class="comment">// 2. アクションボタンと処理</span>
+<span class="highlight">const</span> clicked = <span class="highlight">await</span> M3Snack.show({
+  <span class="prop">message</span>: <span class="string">"削除しました"</span>,
+  <span class="prop">actionText</span>: <span class="string">"元に戻す"</span>,
+  <span class="prop">duration</span>: <span class="highlight">5000</span>
+});
+
+<span class="highlight">if</span> (clicked) {
+  <span class="comment">// ボタンが押された時の処理</span>
+  M3Snack.show({ <span class="prop">message</span>: <span class="string">"復元中..."</span> });
+}</pre>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 M3Snack.js Project</p>
+    </footer>
+</div>
+
+<script>
+    // デモ用関数
+    function demoSimple() {
+        M3Snack.show({
+            message: "設定を更新しました。"
+        });
+    }
+
+    async function demoAction() {
+        const clicked = await M3Snack.show({
+            message: "メッセージをアーカイブしました",
+            actionText: "元に戻す",
+            duration: 6000
+        });
+
+        if (clicked) {
+            M3Snack.show({ message: "アーカイブを取り消しました" });
+        }
+    }
+
+    function demoDuration() {
+        M3Snack.show({
+            message: "この通知は2秒で消えます。",
+            duration: 2000
+        });
+    }
+</script>
+
+</body>
+</html>
