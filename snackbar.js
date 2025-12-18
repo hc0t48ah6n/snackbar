@@ -1,4 +1,7 @@
-    (function() {
+   /**
+         * M3Snack Library 本体
+         */
+        (function() {
             const styleId = 'm3-snack-styles';
             if (!document.getElementById(styleId)) {
                 const style = document.createElement('style');
@@ -9,12 +12,12 @@
                         bottom: 24px;
                         left: 50%;
                         transform: translateX(-50%) translateY(100px);
-                        min-width: 288px;
+                        min-width: 320px;
                         max-width: 568px;
                         background-color: #313033;
                         color: #f4eff4;
                         padding: 14px 16px;
-                        border-radius: 4px;
+                        border-radius: 8px;
                         box-shadow: 0 3px 5px -1px rgba(0,0,0,0.2), 0 6px 10px 0 rgba(0,0,0,0.14);
                         display: flex;
                         align-items: center;
@@ -22,14 +25,14 @@
                         font-family: 'Roboto', sans-serif;
                         font-size: 14px;
                         z-index: 10000;
-                        transition: transform 0.2s cubic-bezier(0, 0, 0.2, 1), opacity 0.2s;
+                        transition: transform 0.25s cubic-bezier(0, 0, 0.2, 1), opacity 0.2s;
                         opacity: 0;
                     }
                     .m3-snack-container.show {
                         transform: translateX(-50%) translateY(0);
                         opacity: 1;
                     }
-                    .m3-snack-message { flex-grow: 1; margin-right: 12px; }
+                    .m3-snack-message { flex-grow: 1; margin-right: 12px; line-height: 1.4; }
                     .m3-snack-action {
                         color: #d0bcff;
                         font-weight: 500;
@@ -37,11 +40,12 @@
                         cursor: pointer;
                         background: none;
                         border: none;
-                        padding: 8px;
-                        margin: -8px;
+                        padding: 8px 12px;
+                        margin: -8px -4px -8px 8px;
                         border-radius: 4px;
                         font-family: inherit;
                         font-size: 14px;
+                        white-space: nowrap;
                     }
                     .m3-snack-action:hover { background-color: rgba(208, 188, 255, 0.08); }
                 `;
@@ -52,9 +56,9 @@
                 show: function(options) {
                     return new Promise((resolve) => {
                         const config = {
-                            message: options.message || '',
+                            message: options.message || 'No message',
                             actionText: options.actionText || '',
-                            duration: options.duration || 4000
+                            duration: options.duration !== undefined ? options.duration : 4000
                         };
 
                         const snack = document.createElement('div');
@@ -68,7 +72,8 @@
                         snack.innerHTML = `<div class="m3-snack-message">${config.message}</div>${actionHtml}`;
                         document.body.appendChild(snack);
 
-                        requestAnimationFrame(() => { snack.classList.add('show'); });
+                        // 描画を確実にするため少し待機
+                        setTimeout(() => { snack.classList.add('show'); }, 10);
 
                         let resolved = false;
                         const dismiss = (result) => {
@@ -76,9 +81,9 @@
                             resolved = true;
                             snack.classList.remove('show');
                             setTimeout(() => {
-                                snack.remove();
+                                if (snack.parentNode) snack.parentNode.removeChild(snack);
                                 resolve(result);
-                            }, 200);
+                            }, 250);
                         };
 
                         const actionBtn = snack.querySelector('.m3-snack-action');
@@ -86,6 +91,7 @@
                             actionBtn.onclick = () => dismiss(true);
                         }
 
+                        // durationが0以上の場合は自動消去
                         if (config.duration > 0) {
                             setTimeout(() => dismiss(false), config.duration);
                         }
@@ -96,29 +102,27 @@
 
         // --- Demo Functions ---
 
-        async function simpleSnack() {
+        function runSimple() {
             M3Snack.show({
-                message: "設定を更新しました"
+                message: "設定をサーバーに保存しました。"
             });
         }
 
-        async function actionSnack() {
-            // 表示と待機
-            const clicked = await M3Snack.show({
-                message: "ファイルをゴミ箱に移動しました",
+        async function runAction() {
+            const result = await M3Snack.show({
+                message: "スレッドをアーカイブしました",
                 actionText: "元に戻す",
-                duration: 5000
+                duration: 6000
             });
 
-            // ボタンが押された（clicked === true）場合の処理
-            if (clicked) {
-                // 続けて別のスナックバーを表示して処理中であることを示す例
-                M3Snack.show({ 
-                    message: "復元しています...",
-                    duration: 2000
-                });
-                console.log("ユーザーがアクションボタンをクリックしました。");
-            } else {
-                console.log("アクションなしで消去されました。");
+            if (result) {
+                M3Snack.show({ message: "アーカイブを取り消しました" });
             }
+        }
+
+        function runLong() {
+            M3Snack.show({
+                message: "この通知は10秒間表示されます。",
+                duration: 10000
+            });
         }
